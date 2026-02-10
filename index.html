@@ -8,8 +8,18 @@
 </head>
 <body>
     <nav class="navbar">
-        <h2>Welcome K-THREE website</h2>
-        <input type="text" id="search" placeholder="Search">
+        <nav class="navbar">
+    <h2>WELCOME TO AVARGE STUDIO</h2>
+    <input type="text" id="search" placeholder="ဂိမ်းအမည်ဖြင့် ရှာရန်..." onkeyup="searchGame()">
+    
+    <div class="categories">
+        <button onclick="filterGame('All')">All</button>
+        <button onclick="filterGame('Action')">Action</button>
+        <button onclick="filterGame('Racing')">Racing</button>
+        <button onclick="filterGame('Horror')">Horror</button>
+    </div>
+        </nav>
+        
     </nav>
 
     <div class="container">
