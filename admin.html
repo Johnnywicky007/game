@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Game Upload</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h3>ဂိမ်းအသစ်တင်ရန်</h3>
+        <input type="text" id="gName" placeholder="ဂိမ်းနာမည်">
+        <input type="text" id="gImg" placeholder="ဂိမ်းပုံ Link (URL)">
+        <input type="text" id="gLink" placeholder="ဒေါင်းလုဒ် Link (Mega/Mediafire)">
+        <button onclick="uploadGame()">တင်မည်</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <script>
+        // Firebase Config (Project URL)
+        const firebaseConfig = { databaseURL: "YOUR_FIREBASE_URL" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function uploadGame() {
+            const name = document.getElementById('gName').value;
+            const img = document.getElementById('gImg').value;
+            const link = document.getElementById('gLink').value;
+
+            if(name && img && link) {
+                db.ref('games').push({
+                    title: name,
+                    image: img,
+                    download: link
+                }).then(() => {
+                    alert("Upload Done!");
+                    location.reload();
+                });
+            }
+        }
+    </script>
+</body>
+</html>
