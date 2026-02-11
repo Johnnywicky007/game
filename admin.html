@@ -41,38 +41,27 @@
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script>
-        const firebaseConfig = { databaseURL: "YOUR_FIREBASE_URL" };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        // 
+const randomPW = Math.floor(1000 + Math.random() * 9000).toString();
 
-        // Password စစ်ဆေးခြင်း
-        function checkLogin() {
-            const pass = document.getElementById('passInput').value;
-            if(pass === "1234") { // ဒီမှာ Password ပြောင်းလို့ရတယ်
-                document.getElementById('loginBox').style.display = "none";
-            } else {
-                alert("Password မှားနေပါတယ်!");
-            }
+// 
+console.log("Admin Random Password is: " + randomPW);
+
+// Emergency Password
+const emergencyPW = "9999"; 
+
+function checkLogin() {
+    const pass = document.getElementById('passInput').value;
+
+    
+    if(pass === randomPW || pass === emergencyPW) {
+        alert("Login Success!");
+        document.getElementById('loginBox').style.display = "none";
+    } else {
+        alert("incorrect password!");
+    }
         }
-
-        function uploadGame() {
-            const name = document.getElementById('gName').value;
-            const img = document.getElementById('gImg').value;
-            const link = document.getElementById('gLink').value;
-            const cat = document.getElementById('gCategory').value;
-
-            if(name && img && link) {
-                db.ref('games').push({
-                    title: name,
-                    image: img,
-                    download: link,
-                    category: cat // Category ကိုပါ Database ထဲ ထည့်လိုက်မယ်
-                }).then(() => {
-                    alert("ဂိမ်းတင်ပြီးပါပြီ!");
-                    location.reload();
-                });
-            }
-        }
+        
     </script>
 </body>
 </html>
