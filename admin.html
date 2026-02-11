@@ -2,115 +2,119 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Admin - Upload</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Admin</title>
     <style>
-        /* Admin panel */
-body {
-    background: #0f172a; /* Dark blue-black background */
-    color: #e2e8f0;
-    font-family: 'Segoe UI', Roboto, sans-serif;
-    margin: 0;
-}
-
-.admin-container {
-    max-width: 500px;
-    margin: 30px auto;
-    padding: 20px;
-}
-
-.admin-card {
-    background: #1e293b;
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-    border: 1px solid #334155;
-}
-
-h3 {
-    text-align: center;
-    color: #38bdf8; /* Cyan color */
-    margin-bottom: 25px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.input-group {
-    margin-bottom: 15px;
-}
-
-.input-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-size: 13px;
-    color: #94a3b8;
-}
-
-input, select {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    background: #0f172a;
-    border: 1px solid #334155;
-    color: white;
-    box-sizing: border-box;
-    transition: 0.3s;
-}
-
-input:focus, select:focus {
-    border-color: #38bdf8;
-    outline: none;
-    box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
-}
-
-.upload-btn {
-    width: 100%;
-    background: linear-gradient(135deg, #38bdf8, #1d4ed8);
-    color: white;
-    border: none;
-    padding: 14px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: 0.3s;
-}
-
-.upload-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(29, 78, 216, 0.4);
-}
-
-/* Login Box အလှဆင်ခြင်း */
-.login-overlay {
-    background: #0f172a;
-    padding: 20px;
-    border-radius: 15px;
-    border: 1px solid #334155;
-    text-align: center;
-    }
+        body { background: #0f172a; color: white; font-family: sans-serif; margin: 0; padding-bottom: 50px; }
+        .admin-card { background: #1e293b; padding: 20px; border-radius: 12px; margin: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        h3 { color: #38bdf8; text-align: center; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; background: #0f172a; border: 1px solid #334155; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #38bdf8; color: white; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .delete-btn { background: #ef4444; width: auto; padding: 5px 10px; }
+        .admin-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding: 10px 0; }
+        #login-section { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; align-items: center; justify-content: center; z-index: 9999; }
     </style>
 </head>
 <body>
 
-    <div id="loginBox" class="login-overlay">
-        <div style="text-align: center;">
-            <h3>Admin Password ရိုက်ပါ</h3>
-            <input type="password" id="passInput" placeholder="Password...">
-            <button onclick="checkLogin()">Login</button>
+    <div id="login-section">
+        <div class="admin-card" style="width: 300px;">
+            <h3>Admin Login</h3>
+            <input type="email" id="adminEmail" placeholder="Email...">
+            <input type="password" id="adminPass" placeholder="Password...">
+            <button onclick="login()">Login</button>
         </div>
     </div>
 
-    <nav class="navbar"><h2>Upload New Game</h2></nav>
+    <div id="admin-dashboard" style="display: none;">
+        <div class="admin-card">
+            <h3>Upload New Game</h3>
+            <input type="text" id="gName" placeholder="ဂိမ်းနာမည်">
+            <input type="text" id="gImg" placeholder="ဂိမ်းပုံ Link (URL)">
+            <input type="text" id="gLink" placeholder="Download Link">
+            <select id="gCategory">
+                <option value="Action">Action</option>
+                <option value="Racing">Racing</option>
+                <option value="Horror">Horror</option>
+                <option value="Adventure">Adventure</option>
+            </select>
+            <button onclick="uploadGame()">Upload</button>
+            <button onclick="logout()" style="background: #475569;">Logout</button>
+        </div>
 
-    <div class="admin-form">
-        <input type="text" id="gName" placeholder="ဂိမ်းနာမည် (ဥပမာ- GTA V)">
-        <input type="text" id="gImg" placeholder="ဂိမ်းပုံ Link (URL)">
-        <input type="text" id="gLink" placeholder="ဒေါင်းလုဒ် Link">
-        
-        <label>အမျိုးအစားရွေးရန်:</label>
-        <select id="gCategory">
-            <option value="Action">Action</option>
+        <div class="admin-card">
+            <h3>Manage Game</h3>
+            <div id="admin-game-list"></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+
+    <script>
+        // ဒီနေရာမှာ မင်းရဲ့ Firebase Config တွေကို ပြန်ထည့်ပါ
+        const firebaseConfig = {
+            apiKey: "AIzaSyBIZFcFZWIuRvCxzJY4asMgVTOrlLufXFU",
+            databaseURL: "https://game-a5d95-default-rtdb.firebaseio.com/",
+            projectId: "game-a5d95"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // Login Check
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('admin-dashboard').style.display = 'block';
+                loadAdminGames();
+            } else {
+                document.getElementById('login-section').style.display = 'flex';
+                document.getElementById('admin-dashboard').style.display = 'none';
+            }
+        });
+
+        function login() {
+            const email = document.getElementById('adminEmail').value;
+            const pass = document.getElementById('adminPass').value;
+            auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
+        }
+
+        function logout() { auth.signOut(); }
+
+        function uploadGame() {
+            const name = document.getElementById('gName').value;
+            const img = document.getElementById('gImg').value;
+            const link = document.getElementById('gLink').value;
+            const cat = document.getElementById('gCategory').value;
+
+            if(name && img && link) {
+                db.ref('games').push({ title: name, image: img, download: link, category: cat })
+                .then(() => { alert("Done"); location.reload(); });
+            }
+        }
+
+        function loadAdminGames() {
+            db.ref('games').on('value', (snap) => {
+                const list = document.getElementById('admin-game-list');
+                list.innerHTML = "";
+                snap.forEach((child) => {
+                    list.innerHTML += `
+                        <div class="admin-item">
+                            <span>${child.val().title}</span>
+                            <button class="delete-btn" onclick="deleteGame('${child.key}')">Delete</button>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        function deleteGame(id) {
+            if(confirm("Are U Sure to delete?")) db.ref('games').child(id).remove();
+        }
+    </script>
+</body>
+<            <option value="Action">Action</option>
             <option value="Racing">Racing</option>
             <option value="Horror">Horror</option>
             <option value="Adventure">Adventure</option>
