@@ -2,44 +2,73 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Game Upload</title>
+    <title>Game Admin - Upload</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-form { background: #1f1f1f; padding: 20px; border-radius: 10px; margin: 20px; }
+        select { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; background: #333; color: white; border: 1px solid #444; }
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #121212; display: flex; justify-content: center; align-items: center; z-index: 1000; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h3>ဂိမ်းအသစ်တင်ရန်</h3>
-        <input type="text" id="gName" placeholder="ဂိမ်းနာမည်">
-        <input type="text" id="gImg" placeholder="ဂိမ်းပုံ Link (URL)">
-        <input type="text" id="gLink" placeholder="ဒေါင်းလုဒ် Link (Mega/Mediafire)">
-        <button onclick="uploadGame()">တင်မည်</button>
+
+    <div id="loginBox" class="login-overlay">
+        <div style="text-align: center;">
+            <h3>Admin Password ရိုက်ပါ</h3>
+            <input type="password" id="passInput" placeholder="Password...">
+            <button onclick="checkLogin()">Login</button>
+        </div>
     </div>
- <select id="gCategory">
-    <option value="Action">Action</option>
-    <option value="Racing">Racing</option>
-    <option value="Horror">Horror</option>
-    <option value="Other">Other</option>
- </select>
-    
+
+    <nav class="navbar"><h2>Upload New Game</h2></nav>
+
+    <div class="admin-form">
+        <input type="text" id="gName" placeholder="ဂိမ်းနာမည် (ဥပမာ- GTA V)">
+        <input type="text" id="gImg" placeholder="ဂိမ်းပုံ Link (URL)">
+        <input type="text" id="gLink" placeholder="ဒေါင်းလုဒ် Link">
+        
+        <label>အမျိုးအစားရွေးရန်:</label>
+        <select id="gCategory">
+            <option value="Action">Action</option>
+            <option value="Racing">Racing</option>
+            <option value="Horror">Horror</option>
+            <option value="Adventure">Adventure</option>
+        </select>
+
+        <button onclick="uploadGame()">Upload</button>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
     <script>
-        // Firebase Config (Project URL)
         const firebaseConfig = { databaseURL: "YOUR_FIREBASE_URL" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+
+        // Password စစ်ဆေးခြင်း
+        function checkLogin() {
+            const pass = document.getElementById('passInput').value;
+            if(pass === "1234") { // ဒီမှာ Password ပြောင်းလို့ရတယ်
+                document.getElementById('loginBox').style.display = "none";
+            } else {
+                alert("Password မှားနေပါတယ်!");
+            }
+        }
 
         function uploadGame() {
             const name = document.getElementById('gName').value;
             const img = document.getElementById('gImg').value;
             const link = document.getElementById('gLink').value;
+            const cat = document.getElementById('gCategory').value;
 
             if(name && img && link) {
                 db.ref('games').push({
                     title: name,
                     image: img,
-                    download: link
+                    download: link,
+                    category: cat // Category ကိုပါ Database ထဲ ထည့်လိုက်မယ်
                 }).then(() => {
-                    alert("Upload Done!");
+                    alert("ဂိမ်းတင်ပြီးပါပြီ!");
                     location.reload();
                 });
             }
