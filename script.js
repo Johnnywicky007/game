@@ -16,14 +16,17 @@ function displayGames(gamesArray) {
     gamesArray.forEach(game => {
         gameList.innerHTML += `
             <div class="game-card">
-                <img src="${game.image}">
+                <div style="position:relative;">
+                    <img src="${game.image}">
+                    <span style="position:absolute; top:5px; right:5px; background:rgba(255,71,87,0.8); padding:2px 8px; border-radius:10px; font-size:10px;">${game.category}</span>
+                </div>
                 <h4>${game.title}</h4>
-                <p style="font-size:10px; color:#aaa;">${game.category || 'General'}</p>
                 <a href="${game.download}" class="download-btn">DOWNLOAD</a>
             </div>
         `;
     });
 }
+
 
 // အမျိုးအစားအလိုက် ခွဲထုတ်ခြင်း
 function filterGame(category) {
