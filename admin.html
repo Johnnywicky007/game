@@ -113,61 +113,6 @@
     </script>
 </body>
 </html>
-        }
-
-        function loadAdminGames() {
-            db.ref('games').on('value', (snap) => {
-                const list = document.getElementById('admin-game-list');
-                list.innerHTML = "";
-                snap.forEach((child) => {
-                    list.innerHTML += `
-                        <div class="admin-item">
-                            <span>${child.val().title}</span>
-                            <button class="delete-btn" onclick="deleteGame('${child.key}')">Delete</button>
-                        </div>
-                    `;
-                });
-            });
-        }
-
-        function deleteGame(id) {
-            if(confirm("Are U Sure to delete?")) db.ref('games').child(id).remove();
-        }
-    </script>
-</body>
-<            <option value="Action">Action</option>
-            <option value="Racing">Racing</option>
-            <option value="Horror">Horror</option>
-            <option value="Adventure">Adventure</option>
-        </select>
-
-        <button onclick="uploadGame()">Upload</button>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
-    <script>
-        // 
-const randomPW = Math.floor(1000 + Math.random() * 9000).toString();
-
-// 
-console.log("Admin Random Password is: " + randomPW);
-
-// Emergency Password
-const emergencyPW = "9999"; 
-
-function checkLogin() {
-    const pass = document.getElementById('passInput').value;
-
     
-    if(pass === randomPW || pass === emergencyPW) {
-        alert("Login Success!");
-        document.getElementById('loginBox').style.display = "none";
-    } else {
-        alert("incorrect password!");
-    }
-        }
+
         
-    </script>
-</body>
-</html>
