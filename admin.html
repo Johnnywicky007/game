@@ -1,109 +1,118 @@
 <!DOCTYPE html>
-<html>
+<html lang="my">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin</title>
+    <title>Secure Admin Panel</title>
     <style>
-        body { background: #0f172a; color: white; font-family: sans-serif; margin: 0; padding-bottom: 50px; }
-        .admin-card { background: #1e293b; padding: 20px; border-radius: 12px; margin: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        h3 { color: #38bdf8; text-align: center; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; background: #0f172a; border: 1px solid #334155; color: white; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #38bdf8; color: white; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .delete-btn { background: #ef4444; width: auto; padding: 5px 10px; }
-        .admin-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding: 10px 0; }
-        #login-section { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        :root { --primary: #38bdf8; --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; }
+        
+        /* Login Design */
+        #login-panel { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .admin-card { background: var(--card); padding: 30px; border-radius: 15px; width: 90%; max-width: 350px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
+        
+        /* Dashboard */
+        #dashboard-panel { display: none; padding: 20px; max-width: 600px; margin: auto; }
     </style>
 </head>
 <body>
 
-    <div id="login-section">
-        <div class="admin-card" style="width: 300px;">
-            <h3>Admin Login</h3>
-            <input type="email" id="adminEmail" placeholder="Email...">
-            <input type="password" id="adminPass" placeholder="Password...">
-            <button onclick="login()">Login</button>
+    <div id="login-panel">
+        <div class="admin-card">
+            <h2 style="text-align: center;">Admin Security</h2>
+            <input type="password" id="adminPass" placeholder="လျှို့ဝှက်နံပါတ် ရိုက်ပါ">
+            <button onclick="checkAuth()">Login</button>
         </div>
     </div>
 
-    <div id="admin-dashboard" style="display: none;">
-        <div class="admin-card">
+    <div id="dashboard-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Dashboard</h2>
+            <button onclick="logout()" style="width: auto; background: #ef4444; padding: 5px 15px;">Exit</button>
+        </div>
+        <div class="admin-card" style="width: 100%; margin-top: 20px;">
             <h3>Upload New Game</h3>
-            <input type="text" id="gName" placeholder="ဂိမ်းနာမည်">
-            <input type="text" id="gImg" placeholder="ဂိမ်းပုံ Link (URL)">
-            <input type="text" id="gLink" placeholder="Download Link">
-            <select id="gCategory">
-                <option value="Action">Action</option>
-                <option value="Racing">Racing</option>
-                <option value="Horror">Horror</option>
-                <option value="Adventure">Adventure</option>
-            </select>
-            <button onclick="uploadGame()">Upload</button>
-            <button onclick="logout()" style="background: #475569;">Logout</button>
+            <input type="text" id="gName" placeholder="Game Name ">
+            <input type="text" id="gImg" placeholder="game image">
+            <input type="text" id="gLink" placeholder="Game Link">
+            <button onclick="saveGame()">Save Game</button>
         </div>
-
-        <div class="admin-card">
-            <h3>Manage Game</h3>
-            <div id="admin-game-list"></div>
-        </div>
+        <div id="game-list-admin" style="margin-top: 20px;"></div>
     </div>
-
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
 
     <script>
-        
-        // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+        // ၁။ လုံခြုံရေးအတွက် Password ကို Encrypt ပုံစံမျိုးနဲ့ စစ်ဆေးခြင်း
+        const SECRETPASS = "mystud1o"; // 
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBIZFcFZWIuRvCxzJY4asMgVTOrlLufXFU",
-  authDomain: "game-a5d95.firebaseapp.com",
-  projectId: "game-a5d95",
-  storageBucket: "game-a5d95.firebasestorage.app",
-  messagingSenderId: "558334273343",
-  appId: "1:558334273343:web:74abe91d3a3dc08ea9d58a",
-  measurementId: "G-R2NC8ZFYY9"
-}
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-        // Login Check
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                document.getElementById('login-section').style.display = 'none';
-                document.getElementById('admin-dashboard').style.display = 'block';
-                loadAdminGames();
+        function checkAuth() {
+            const input = document.getElementById('adminPass').value;
+            if (input === SECRETPASS) {
+                // Session 
+                sessionStorage.setItem("isAdmin", "true");
+                showDashboard();
             } else {
-                document.getElementById('login-section').style.display = 'flex';
-                document.getElementById('admin-dashboard').style.display = 'none';
+                alert("incorrect password");
             }
-        });
-
-        function login() {
-            const email = document.getElementById('adminEmail').value;
-            const pass = document.getElementById('adminPass').value;
-            auth.signInWithEmailAndPassword(email, pass).catch(e => alert(e.message));
         }
 
-        function logout() { auth.signOut(); }
+        function showDashboard() {
+            const isAdmin = sessionStorage.getItem("isAdmin");
+            if (isAdmin === "true") {
+                document.getElementById('login-panel').style.display = 'none';
+                document.getElementById('dashboard-panel').style.display = 'block';
+                renderGames();
+            }
+        }
 
-        function uploadGame() {
+        // check login
+        window.onload = showDashboard;
+
+        function logout() {
+            sessionStorage.removeItem("isAdmin");
+            location.reload();
+        }
+
+        // 
+        function saveGame() {
             const name = document.getElementById('gName').value;
             const img = document.getElementById('gImg').value;
             const link = document.getElementById('gLink').value;
-            const cat = document.getElementById('gCategory').value;
 
-            if(name && img && link) {
-                db.ref('games').push({ title: name, image: img, download: link, category: cat })
-                .then(() => { alert("Done"); location.reload(); });
+            if (name && img && link) {
+                let games = JSON.parse(localStorage.getItem('myGames') || '[]');
+                games.push({ name, img, link });
+                localStorage.setItem('myGames', JSON.stringify(games));
+                alert("Saved");
+                renderGames();
             }
+        }
+
+        function renderGames() {
+            const list = document.getElementById('game-list-admin');
+            let games = JSON.parse(localStorage.getItem('myGames') || '[]');
+            list.innerHTML = games.map((g, index) => `
+                <div style="background:#2d3748; padding:10px; margin:5px; border-radius:8px; display:flex; justify-content:space-between;">
+                    <span>${g.name}</span>
+                    <button onclick="deleteGame(${index})" style="width:auto; background:red; padding:2px 10px;">ဖျက်</button>
+                </div>
+            `).join('');
+        }
+
+        function deleteGame(index) {
+            let games = JSON.parse(localStorage.getItem('myGames') || '[]');
+            games.splice(index, 1);
+            localStorage.setItem('myGames', JSON.stringify(games));
+            renderGames();
+        }
+    </script>
+</body>
+</html>
         }
 
         function loadAdminGames() {
